@@ -7,26 +7,26 @@ RESET_COLOR="\e[0m"
 # Function to show a single-pass progress bar animation
 show_progress_bar() {
     local pid=$1
-    local delay=0.05 # Delay between each segment of the bar
+    local delay=.2 # Delay between each segment of the bar
     local color_index=0
     local progress_bar=""
-    local width=100 # Width of the progress bar
-
+    local width=80 # Width of the progress bar
+    
     # Fill the progress bar from start to finish in a single pass
     for i in $(seq 1 $width); do
         # Build the progress bar incrementally
-        progress_bar+="$"
-
+        progress_bar+="#"
+        
         # Display the progress bar with color
         local color=${COLORS[color_index]}
         echo -ne "${color}[${progress_bar:0:width}$(printf '%*s' $((width - ${#progress_bar})))]${RESET_COLOR}\r"
-
+        
         # Cycle through colors
         color_index=$(( (color_index + 1) % ${#COLORS[@]} ))
-
+        
         sleep "$delay"
     done
-
+    
     # Wait for the background process to complete after displaying the progress bar once
     wait "$pid" 2>/dev/null
     echo -ne "\r${RESET_COLOR}   \r" # Clear the line after the process finishes
@@ -72,6 +72,12 @@ if [ ! -d "nextjs-layer-caker" ]; then
     --eslint \
     --import-alias "@/*" & # Run in background
     show_progress_bar $!    # Show progress bar while creating project
+    
+    # Check if the directory was created successfully
+    if [ ! -d "nextjs-layer-caker" ]; then
+        echo -e "${COLORS[0]}Error: The 'nextjs-layer-caker' directory was not created. Please check for errors in the create-next-app process.${RESET_COLOR}"
+        exit 1
+    fi
 else
     echo -e "${COLORS[3]}Project 'nextjs-layer-caker' already exists. Skipping creation.${RESET_COLOR}"
 fi
