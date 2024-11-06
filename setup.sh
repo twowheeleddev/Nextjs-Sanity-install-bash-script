@@ -1,33 +1,48 @@
 #!/bin/bash
 
-# Function to show a spinner animation while a background process is running
-show_spinner() {
-  # $1 is the process ID of the command that the spinner will track
-  local pid=$1
-  # delay between each frame of the spinner
-  local delay=0.1
-  # Array of characters to display as the spinner animation. ** The best I could come up with **
-  local spinner=('|' '/' '-' '\')
+# Define colors for the spinner
+COLORS=("\e[31m" "\e[32m" "\e[33m" "\e[34m" "\e[35m" "\e[36m")
+RESET_COLOR="\e[0m"
 
-  # Loop the animation while the given PID is still running
+# Define spinner frames for the left-right animation
+SPINNER_FRAMES=("⠁" "⠂" "⠄" "⠂")
+
+# Function to show a spinner animation with color changes
+show_spinner() {
+  # $1 is the process ID of the command being tracked
+  local pid=$1
+  local delay=0.1 # Delay between frames
+  local color_index=0
+  local frame_index=0
+  local direction=1 # Controls left-to-right and right-to-left animation
+
+  # Loop while the given process ID is running
   while kill -0 "$pid" 2>/dev/null; do
-    # Loop through each character in the spinners array, basically creating the spinner animation by looping over each character sort of making motion.
-    for i in "${spinner[@]}"; do
-      # Display the spinner character and overwrite the previous one with \r
-      printf "\r%s" "$i"
-      # Pause briefly to add effect to the animation
-      sleep "$delay"
-    done
+    # Select the current color and spinner frame
+    color=${COLORS[color_index]}
+    frame=${SPINNER_FRAMES[frame_index]}
+    # Display the spinner frame with the current color
+    echo -ne "${color}${frame}${RESET_COLOR}\r"
+
+    # Update frame index for left-to-right and back movement
+    frame_index=$((frame_index + direction))
+    if [ "$frame_index" -eq "${#SPINNER_FRAMES[@]}" ]; then
+      direction=-1
+      frame_index=$((frame_index - 2))
+    elif [ "$frame_index" -lt 0 ]; then
+      direction=1
+      frame_index=1
+    fi
+
+    # Cycle through colors
+    color_index=$(((color_index + 1) % ${#COLORS[@]}))
+    sleep "$delay"
   done
-  printf "\r" # Clear the spinner line after the background process is complete
+  echo -ne "\r${RESET_COLOR}   \r" # Clear the line after the process finishes
 }
 
-# Step 1: Create Client and Server directories
+# Step 1: Check and create Client and Server directories
 echo "Checking if Client and Server directories already exist..."
-
-# Check if Client directory exists
-# If directory exists, skip creation and move to next step
-# If directory does not exist, create the directory using the 'mkdir' command
 if [ -d "Client" ]; then
   echo "Directory 'Client' already exists. Skipping creation."
 else
@@ -35,9 +50,6 @@ else
   mkdir Client
 fi
 
-# Check if Server directory exists
-# If directory exists, skip creation and move to next step
-# If directory does not exist, create the directory using the 'mkdir' command
 if [ -d "Server" ]; then
   echo "Directory 'Server' already exists. Skipping creation."
 else
@@ -45,67 +57,50 @@ else
   mkdir Server
 fi
 
-# Step 2: Navigate into Server directory and install Sanity dependencies
+# Step 2: Navigate to Server and install Sanity dependencies
 echo "Navigating into Server directory and installing Sanity dependencies..."
-# Navigate (eg. 'cd') into the Server directory
 cd Server
-# Run npm install command to install the required dependencies  (next-sanity and @sanity/image-url) use the --force flag to bypass every safety check ever created in a computer system and smile knowing that you have just saved yourself a few minutes of your life.--sarcasm
-npm install next-sanity @sanity/image-url --force &
+npm install next-sanity @sanity/image-url --force & # Run in background
+show_spinner $!                                     # Show spinner while installing
 
-# Start spinner animation while the npm install command is running
-show_spinner $!
-
-# Step 3: Go back to the root directory
+# Step 3: Return to root directory
 echo "Returning to the root directory..."
-# Again 'cd ..' takes us back to the root where both Client and Server directories were created
 cd ..
 
-# Step 4: Navigate into Client directory
+# Step 4: Navigate into Client directory and create Next.js project
 echo "Navigating into Client directory..."
-# Here comes the broken record Navig......
 cd Client
 
-# Step 5: Create a Next.js project with specified options
 echo "Creating a Next.js project with Tailwind CSS, TypeScript, and other configurations..."
-npx create-next-app@latest nextjs-layer-caker
-# Tailwind CSS is a utility-first CSS framework
---tailwind \ 
-# TypeScript is a typed superset of JavaScript that compiles to plain JavaScript
---typescript \ 
-# This is a custom template that includes a few extra configurations
---app \ 
-# This is a custom template that includes a few extra configurations
---src-dir
-# ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code
---eslint \ 
-# This is a custom template that includes a few extra configurations
---import-alias "@/*" &
+npx create-next-app@latest nextjs-layer-caker \
+  --tailwind \
+  --typescript \
+  --app \
+  --src-dir \
+  --eslint \
+  --import-alias "@/*" & # Run in background
+show_spinner $!          # Show spinner while creating project
 
-# Start spinner animation while npx is creating the Next.js project
-show_spinner $!
-
-# Step 6: Wait for dependencies to finish installing
+# Step 5: Wait briefly to ensure dependencies finish installing
 echo "Waiting for dependencies to finish installing..."
 sleep 10
 
-# Step 7: Navigate into the newly created Next.js project folder
+# Step 6: Navigate into the new Next.js project folder
 echo "Navigating into the newly created Next.js project folder..."
 cd nextjs-layer-caker || exit
 
-# Step 8: Install additional Sanity dependencies
+# Step 7: Install additional Sanity dependencies in Client project
 echo "Installing additional Sanity dependencies..."
-npm install next-sanity @sanity/image-url --legacy-peer-deps &
+npm install next-sanity @sanity/image-url --legacy-peer-deps & # Run in background
+show_spinner $!                                                # Show spinner while installing additional dependencies
 
-# Start spinner animation while npm is installing the additional dependencies
-show_spinner $!
-
-# Step 9: Run the Next.js dev server
+# Step 8: Start the Next.js development server
 echo "Starting the Next.js development server..."
-npm run dev &
+npm run dev & # Run in background
 
-# Step 10: Give the server time to start up
+# Step 9: Wait for the server to start
 echo "Giving the server time to start up..."
 sleep 5
 
-# Final message to indicate setup is complete
-echo "Setup complete! You are now running the latest Next.js development server with Sanity dependencies installed. Code Saves Lives!"
+# Final message indicating setup completion
+echo -e "${COLORS[3]}Setup complete! You are now running the latest Next.js development server with Sanity dependencies installed. Code Saves Lives!${RESET_COLOR}"
