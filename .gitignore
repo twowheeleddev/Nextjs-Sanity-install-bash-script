@@ -1,0 +1,46 @@
+# Node modules
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Sanity build and cache
+.sanity/
+dist/
+.cache/
+
+# Generated files
+*.log
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# Local environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# MacOS and system files
+.DS_Store
+Thumbs.db
+
+# Lock files (optional, depending on your team’s needs)
+package-lock.json
+yarn.lock
+
+# Editor-specific folders (optional, based on your setup)
+.idea/
+.vscode/
+
+# Other ignored files
+coverage/
+*.swp
+
+# Ignore files related to the script’s generated output
+Client/nextjs-layer-caker/.next/
+Client/nextjs-layer-caker/out/
+Server/node_modules/
+Client/node_modules/

@@ -67,13 +67,19 @@ cd Client
 
 # Step 5: Create a Next.js project with specified options
 echo "Creating a Next.js project with Tailwind CSS, TypeScript, and other configurations..."
-npx create-next-app@latest nextjs-layer-caker \
-  --tailwind \ # Tailwind CSS is a utility-first CSS framework
---typescript \ # TypeScript is a typed superset of JavaScript that compiles to plain JavaScript
---app \ # This is a custom template that includes a few extra configurations
---src-dir \ # This is a custom template that includes a few extra configurations
---eslint \ # ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code
---import-alias "@/*" & # This is a custom template that includes a few extra configurations
+npx create-next-app@latest nextjs-layer-caker
+# Tailwind CSS is a utility-first CSS framework
+--tailwind \ 
+# TypeScript is a typed superset of JavaScript that compiles to plain JavaScript
+--typescript \ 
+# This is a custom template that includes a few extra configurations
+--app \ 
+# This is a custom template that includes a few extra configurations
+--src-dir
+# ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code
+--eslint \ 
+# This is a custom template that includes a few extra configurations
+--import-alias "@/*" &
 
 # Start spinner animation while npx is creating the Next.js project
 show_spinner $!
