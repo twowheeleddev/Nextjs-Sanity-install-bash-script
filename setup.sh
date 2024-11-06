@@ -7,10 +7,10 @@ RESET_COLOR="\e[0m"
 # Function to show a single-pass progress bar animation
 show_progress_bar() {
     local pid=$1
-    local delay=.2 # Delay between each segment of the bar
+    local delay=0.05 # Delay between each segment of the bar
     local color_index=0
     local progress_bar=""
-    local width=90 # Width of the progress bar
+    local width=50 # Width of the progress bar
     
     # Fill the progress bar from start to finish in a single pass
     for i in $(seq 1 $width); do
