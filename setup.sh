@@ -51,7 +51,7 @@ fi
 # Step 2: Navigate to Server and install Sanity dependencies
 echo -e "${COLORS[5]}Navigating into Server directory and installing Sanity dependencies...${RESET_COLOR}"
 cd Server
-npm install next-sanity @sanity/image-url --force & # Run in background
+npm install next-sanity @sanity/image-url --force & # Run in background with --force
 show_progress_bar $!                                # Show progress bar while installing
 
 # Step 3: Return to root directory
@@ -73,7 +73,7 @@ if [ ! -f "package.json" ]; then
     --eslint \
     --import-alias "@/*" & # Run in background
     show_progress_bar $!    # Show progress bar while creating project
-
+    
     # Check if package.json was created successfully to verify project setup
     if [ ! -f "package.json" ]; then
         echo -e "${COLORS[0]}Error: The Next.js project was not created. Please check for errors in the create-next-app process.${RESET_COLOR}"
@@ -89,8 +89,8 @@ sleep 10
 
 # Step 6: Install additional Sanity dependencies in Client project
 echo -e "${COLORS[0]}Installing additional Sanity dependencies...${RESET_COLOR}"
-npm install next-sanity @sanity/image-url --legacy-peer-deps & # Run in background
-show_progress_bar $!                                            # Show progress bar while installing additional dependencies
+npm install next-sanity @sanity/image-url --legacy-peer-deps --force & # Run in background with --force
+show_progress_bar $!                                                    # Show progress bar while installing additional dependencies
 
 # Step 7: Check if start script exists in package.json, if not, add it
 echo -e "${COLORS[1]}Ensuring package.json has a 'start' script...${RESET_COLOR}"
@@ -114,7 +114,11 @@ echo -e "${COLORS[2]}Enter the name of the server you want to start (press Enter
 read -r server_choice
 server_choice=${server_choice:-dev} # Set default to 'dev' if input is empty
 
-# Step 9: Start the selected npm script in the foreground
+# Step 9: Run npm install --force in Client directory
+echo -e "${COLORS[5]}Running npm install --force in the Client directory to ensure all dependencies are installed...${RESET_COLOR}"
+npm install --force
+
+# Step 10: Start the selected npm script in the foreground
 if npm run "$server_choice"; then
     echo -e "${COLORS[3]}Starting the Next.js server with '${server_choice}'...${RESET_COLOR}"
 else
