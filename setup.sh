@@ -62,9 +62,10 @@ cd ..
 echo -e "${COLORS[1]}Navigating into Client directory...${RESET_COLOR}"
 cd Client
 
-if [ ! -d "nextjs-layer-caker" ]; then
+# Run create-next-app directly in Client directory
+if [ ! -f "package.json" ]; then
     echo -e "${COLORS[2]}Creating a Next.js project with Tailwind CSS, TypeScript, and other configurations...${RESET_COLOR}"
-    yes no | npx create-next-app@latest nextjs-layer-caker \
+    yes no | npx create-next-app@latest . \
     --tailwind \
     --typescript \
     --app \
@@ -72,35 +73,26 @@ if [ ! -d "nextjs-layer-caker" ]; then
     --eslint \
     --import-alias "@/*" & # Run in background
     show_progress_bar $!    # Show progress bar while creating project
-    
-    # Check if the directory was created successfully
-    if [ ! -d "nextjs-layer-caker" ]; then
-        echo -e "${COLORS[0]}Error: The 'nextjs-layer-caker' directory was not created. Please check for errors in the create-next-app process.${RESET_COLOR}"
+
+    # Check if package.json was created successfully to verify project setup
+    if [ ! -f "package.json" ]; then
+        echo -e "${COLORS[0]}Error: The Next.js project was not created. Please check for errors in the create-next-app process.${RESET_COLOR}"
         exit 1
     fi
 else
-    echo -e "${COLORS[3]}Project 'nextjs-layer-caker' already exists. Skipping creation.${RESET_COLOR}"
+    echo -e "${COLORS[3]}Next.js project already exists in 'Client' directory. Skipping creation.${RESET_COLOR}"
 fi
 
 # Step 5: Wait briefly to ensure dependencies finish installing
 echo -e "${COLORS[4]}Waiting for dependencies to finish installing...${RESET_COLOR}"
 sleep 10
 
-# Step 6: Navigate into the new Next.js project folder if it exists
-if [ -d "nextjs-layer-caker" ]; then
-    echo -e "${COLORS[5]}Navigating into the newly created Next.js project folder...${RESET_COLOR}"
-    cd nextjs-layer-caker
-else
-    echo -e "${COLORS[0]}Error: The 'nextjs-layer-caker' directory was not created. Exiting.${RESET_COLOR}"
-    exit 1
-fi
-
-# Step 7: Install additional Sanity dependencies in Client project
+# Step 6: Install additional Sanity dependencies in Client project
 echo -e "${COLORS[0]}Installing additional Sanity dependencies...${RESET_COLOR}"
 npm install next-sanity @sanity/image-url --legacy-peer-deps & # Run in background
 show_progress_bar $!                                            # Show progress bar while installing additional dependencies
 
-# Step 8: Check if start script exists in package.json, if not, add it
+# Step 7: Check if start script exists in package.json, if not, add it
 echo -e "${COLORS[1]}Ensuring package.json has a 'start' script...${RESET_COLOR}"
 if ! grep -q '"start":' package.json; then
     echo "Adding 'start' script to package.json..."
@@ -109,7 +101,7 @@ else
     echo "'start' script already exists in package.json."
 fi
 
-# Step 9: List available npm scripts and prompt the user
+# Step 8: List available npm scripts and prompt the user
 echo -e "${COLORS[2]}Available npm scripts:${RESET_COLOR}"
 if command -v jq &>/dev/null; then
     jq -r '.scripts | keys_unsorted[]' package.json
@@ -122,7 +114,7 @@ echo -e "${COLORS[2]}Enter the name of the server you want to start (press Enter
 read -r server_choice
 server_choice=${server_choice:-dev} # Set default to 'dev' if input is empty
 
-# Step 10: Start the selected npm script in the foreground
+# Step 9: Start the selected npm script in the foreground
 if npm run "$server_choice"; then
     echo -e "${COLORS[3]}Starting the Next.js server with '${server_choice}'...${RESET_COLOR}"
 else
